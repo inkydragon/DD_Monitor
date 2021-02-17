@@ -5,6 +5,7 @@ DD监控室主界面进程 包含对所有子页面的初始化、排版管理
 新增全局鼠标坐标跟踪 用于刷新鼠标交互效果
 """
 import log
+from config import GlobalConfig
 # 找不到 dll
 # https://stackoverflow.com/questions/54110504/dynlib-dll-was-no-found-when-the-application-was-frozen-when-i-make-a-exe-fil
 import ctypes
@@ -240,85 +241,9 @@ class MainWindow(QMainWindow):
         self.cacheFolder = cacheFolder
 
         # ---- json 配置文件加载 ----
-        self.configJSONPath = os.path.join(application_path, r'utils/config.json')
-        self.config = {}
-        # 读取默认的 config
-        if os.path.exists(self.configJSONPath):
-            if os.path.getsize(self.configJSONPath):
-                try:
-                    with codecs.open(self.configJSONPath, 'r', encoding='utf-8') as f:
-                        self.config = json.loads(f.read())
-                    # self.config = json.loads(open(self.configJSONPath).read())
-                except:
-                    logging.exception('json 配置读取失败')
-                    self.config = {}
-        # 读取config失败 尝试读取备份
-        if not self.config:  
-            for backupNumber in [1, 2, 3]:  # 备份预设123
-                self.configJSONPath = os.path.join(application_path, r'utils/config_备份%d.json' % backupNumber)
-                if os.path.exists(self.configJSONPath):  # 如果备份文件存在
-                    if os.path.getsize(self.configJSONPath):  # 如过备份文件有效
-                        try:
-                            self.config = json.loads(open(self.configJSONPath).read())
-                            break
-                        except:
-                            logging.exception('json 备份配置读取失败')
-                            self.config = {}
-        # 如果能成功读取到config文件
-        if self.config:  
-            while len(self.config['player']) < 9:
-                self.config['player'].append('0')
-            self.config['player'] = list(map(str, self.config['player']))
-            if type(self.config['roomid']) == list:
-                roomIDList = self.config['roomid']
-                self.config['roomid'] = {}
-                for roomID in roomIDList:
-                    self.config['roomid'][roomID] = False
-            if '0' in self.config['roomid']:  # 过滤0房间号
-                del self.config['roomid']['0']
-            if 'quality' not in self.config:
-                self.config['quality'] = [80] * 9
-            if 'audioChannel' not in self.config:
-                self.config['audioChannel'] = [0] * 9
-            if 'translator' not in self.config:
-                self.config['translator'] = [True] * 9
-            for index, textSetting in enumerate(self.config['danmu']):
-                if type(textSetting) == bool:
-                    self.config['danmu'][index] = [textSetting, 20, 1, 7, 0, '【 [ {']
-            if 'hardwareDecode' not in self.config:
-                self.config['hardwareDecode'] = True
-            if 'maxCacheSize' not in self.config:
-                self.config['maxCacheSize'] = 2048000
-                logging.warning('最大缓存没有被设置，使用默认1G')
-            if 'saveCachePath' not in self.config:
-                self.config['saveCachePath'] = ''
-                logging.warning('默认缓存备份路径为空 即自动清空')
-            if 'startWithDanmu' not in self.config:
-                self.config['startWithDanmu'] = True
-                logging.warning('启动时加载弹幕没有被设置，默认加载')
-            if 'showStartLive' not in self.config:
-                self.config['showStartLive'] = True
-            for danmuConfig in self.config['danmu']:
-                if len(danmuConfig) == 6:
-                    danmuConfig.append(10)
-        else:  # 默认和备份 json 配置均读取失败
-            self.config = {
-                'roomid': {'21396545': False, '21402309': False, '22384516': False, '8792912': False},  # 置顶显示
-                'layout': [(0, 0, 1, 1), (0, 1, 1, 1), (1, 0, 1, 1), (1, 1, 1, 1)],
-                'player': ['0'] * 9,
-                'quality': [80] * 9,
-                'audioChannel': [0] * 9,
-                'muted': [1] * 9,
-                'volume': [50] * 9,
-                'danmu': [[True, 50, 1, 7, 0, '【 [ {', 10]] * 9,  # 显示,透明,横向,纵向,类型,同传字符,字体大小
-                'globalVolume': 30,
-                'control': True,
-                'hardwareDecode': True,
-                'maxCacheSize': 2048000,
-                'saveCachePath': '',
-                'startWithDanmu': True,
-                'showStartLive': True,
-            }
+        cfg = GlobalConfig(application_path)
+        cfg.load_config()
+        self.config = cfg.config
         self.dumpConfig = DumpConfig(self.config)
 
         # ---- 主窗体控件 ----
