@@ -5,10 +5,38 @@ import os.path
 import logging
 import codecs
 import json
+import locale
+
+
+def read_local_config_file(cfg_path):
+    """尝试读取用户指定的配置文件
+    默认使用 UTF-8 编码，然后尝试系统偏好的编码
+    """
+    logging.info('尝试读取用户指定的配置')
+    logging.debug(f'cfg_path={cfg_path}')
+    logging.info(locale.getdefaultlocale())
+
+    try:
+        with codecs.open(cfg_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+    except UnicodeDecodeError:
+        logging.exception(f'使用 UTF-8 编码读取 json 配置文件失败')
+        local_encoding = locale.getpreferredencoding()
+        try:
+            with codecs.open(cfg_path, 'r', encoding=local_encoding) as f:
+                config = json.load(f)
+        except:
+            logging.exception(f'使用{local_encoding}编码读取 json 配置文件失败')
+            config = {}
+    except:
+        logging.exception('json 配置导入失败')
+        config = {}
+
+    return config
 
 
 class GlobalConfig:
-    def __init__(self, root_path):
+    def __init__(self, root_path=''):
         self.cfg_dir = os.path.join(root_path, 'utils')
         self.config_path = os.path.join(self.cfg_dir, 'config.json')
         self.config = {}

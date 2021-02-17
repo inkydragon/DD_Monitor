@@ -5,7 +5,7 @@ DD监控室主界面进程 包含对所有子页面的初始化、排版管理
 新增全局鼠标坐标跟踪 用于刷新鼠标交互效果
 """
 import log
-from config import GlobalConfig
+from config import GlobalConfig, read_local_config_file
 # 找不到 dll
 # https://stackoverflow.com/questions/54110504/dynlib-dll-was-no-found-when-the-application-was-frozen-when-i-make-a-exe-fil
 import ctypes
@@ -951,63 +951,22 @@ class MainWindow(QMainWindow):
                 logging.exception('json 配置导出失败')
 
     def importConfig(self):
-        jsonPath = QFileDialog.getOpenFileName(self, "选择预设", None, "*.json")[0]
-        if jsonPath:
-            if os.path.getsize(jsonPath):
-                config = {}
-                try:
-                    with codecs.open(jsonPath, 'r', encoding='utf-8') as f:
-                        config = json.loads(f.read())
-                except UnicodeDecodeError:
-                    try:
-                        with codecs.open(jsonPath, 'r', encoding='gbk') as f:
-                            config = json.loads(f.read())
-                    except:
-                        logging.exception('json 配置导入失败')
-                        config = {}
-                except:
-                    logging.exception('json 配置导入失败')
-                    config = {}
-                if config:  # 如果能成功读取到config文件
-                    config['layout'] = self.config['layout']  # 保持最新layout
-                    self.config = config
-                    while len(self.config['player']) < 9:
-                        self.config['player'].append('0')
-                    self.config['player'] = list(map(str, self.config['player']))
-                    if type(self.config['roomid']) == list:
-                        roomIDList = self.config['roomid']
-                        self.config['roomid'] = {}
-                        for roomID in roomIDList:
-                            self.config['roomid'][roomID] = False
-                    if '0' in self.config['roomid']:  # 过滤0房间号
-                        del self.config['roomid']['0']
-                    if 'quality' not in self.config:
-                        self.config['quality'] = [80] * 9
-                    if 'audioChannel' not in self.config:
-                        self.config['audioChannel'] = [0] * 9
-                    if 'translator' not in self.config:
-                        self.config['translator'] = [True] * 9
-                    for index, textSetting in enumerate(self.config['danmu']):
-                        if type(textSetting) == bool:
-                            self.config['danmu'][index] = [textSetting, 20, 1, 7, 0, '【 [ {']
-                    if 'hardwareDecode' not in self.config:
-                        self.config['hardwareDecode'] = True
-                    if 'maxCacheSize' not in self.config:
-                        self.config['maxCacheSize'] = 2048000
-                        logging.warning('最大缓存没有被设置，使用默认1G')
-                    if 'saveCachePath' not in self.config:
-                        self.config['saveCachePath'] = ''
-                        logging.warning('默认缓存备份路径为空 即自动清空')
-                    if 'startWithDanmu' not in self.config:
-                        self.config['startWithDanmu'] = True
-                        logging.warning('启动时加载弹幕没有被设置，默认加载')
-                    if 'showStartLive' not in self.config:
-                        self.config['showStartLive'] = True
-                    for danmuConfig in self.config['danmu']:
-                        if len(danmuConfig) == 6:
-                            danmuConfig.append(10)
-                    self.liverPanel.addLiverRoomList(self.config['roomid'])
-                    QMessageBox.information(self, '导入预设', '导入完成', QMessageBox.Ok)
+        json_path = QFileDialog.getOpenFileName(self, "选择预设", None, "*.json")[0]
+
+        if os.path.isfile(json_path) and os.path.getsize(json_path):
+            config = read_local_config_file(json_path)
+        else:
+            QMessageBox.warning(self, '导入预设', '无效的配置文件', QMessageBox.Ok)
+            return None
+
+        if config:  # 如果能成功读取到 config 文件
+            config['layout'] = self.config['layout']  # 保持最新layout
+            cfg = GlobalConfig()
+            cfg.config = config
+            cfg.check_config()
+            self.config = cfg.config
+            self.liverPanel.addLiverRoomList(self.config['roomid'])
+            QMessageBox.information(self, '导入预设', '导入完成', QMessageBox.Ok)
 
     def muteExcept(self):
         if not self.soloToken:
