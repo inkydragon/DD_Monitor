@@ -1022,6 +1022,8 @@ if __name__ == '__main__':
     # 平台相关 patch
     if platform.system() == 'Windows':
         ctypes.windll.kernel32.SetDllDirectoryW(None)
+
+    # 确定程序根目录
     if getattr(sys, 'frozen', False):
         application_path = os.path.dirname(sys.executable)
     elif __file__:
@@ -1042,20 +1044,13 @@ if __name__ == '__main__':
     cacheFolder = os.path.join(application_path, 'cache/%d' % time.time())  # 初始化缓存文件夹
     os.mkdir(cacheFolder)
 
-    # 应用qss
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app = QApplication(sys.argv)
-    with open(os.path.join(application_path, 'utils/qdark.qss'), 'r') as f:
-        qss = f.read()
-    app.setStyleSheet(qss)
-    app.setFont(QFont('微软雅黑', 9))
-
     # 日志采集初始化
     log.init_log(application_path)
     sys.excepthook = uncaughtExceptionHandler
     sys.unraisablehook = unraisableExceptionHandler
     threading.excepthook = thraedingExceptionHandler
     loggingSystemInfo()
+
     # vlc 版本信息log
     import vlc
     vlc_libvlc_env = os.getenv('PYTHON_VLC_LIB_PATH', '')
@@ -1064,6 +1059,14 @@ if __name__ == '__main__':
     logging.info(f"plugin env: PYTHON_VLC_MODULE_PATH={vlc_plugin_env}")
     logging.info(f"libvlc path: {vlc.dll._name}")
     logging.info(f"vlc version: {vlc.libvlc_get_version()}")
+
+    # 应用启动、加载 qss
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app = QApplication(sys.argv)
+    with open(os.path.join(application_path, 'utils/qdark.qss'), 'r') as f:
+        qss = f.read()
+    app.setStyleSheet(qss)
+    app.setFont(QFont('微软雅黑', 9))
 
     # 欢迎页面
     splash = QSplashScreen(QPixmap(os.path.join(application_path, 'utils/splash.jpg')), Qt.WindowStaysOnTopHint)
