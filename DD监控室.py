@@ -1060,8 +1060,17 @@ if __name__ == '__main__':
     logging.info(f"libvlc path: {vlc.dll._name}")
     logging.info(f"vlc version: {vlc.libvlc_get_version()}")
 
+    # 加载配置
+    cfg = GlobalConfig(application_path)
+    cfg.load_config()
+    # 默认开启高 DPI 适配
+    #   要关闭，在配置文件中添加 "AA_EnableHighDpiScaling": false,
+    if cfg.config.get('AA_EnableHighDpiScaling', True):
+        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+        QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        logging.info('开启高 DPI 适配')
+
     # 应用启动、加载 qss
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     with open(os.path.join(application_path, 'utils/qdark.qss'), 'r') as f:
         qss = f.read()
