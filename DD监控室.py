@@ -5,7 +5,7 @@ DD监控室主界面进程 包含对所有子页面的初始化、排版管理
 新增全局鼠标坐标跟踪 用于刷新鼠标交互效果
 """
 import log
-from config import GlobalConfig, read_local_config_file
+from config import GlobalConfig, read_local_config_file, write_config_to_file
 # 找不到 dll
 # https://stackoverflow.com/questions/54110504/dynlib-dll-was-no-found-when-the-application-was-frozen-when-i-make-a-exe-fil
 import ctypes
@@ -197,8 +197,7 @@ class DumpConfig(QThread):
     def run(self):
         try:
             configJSONPath = os.path.join(application_path, r'utils/config.json')
-            with codecs.open(configJSONPath, 'w', encoding='utf-8') as f:
-                f.write(json.dumps(self.config, ensure_ascii=False))
+            write_config_to_file(configJSONPath, self.config)
         except:
             logging.exception('config.json 写入失败')
 
@@ -207,10 +206,7 @@ class DumpConfig(QThread):
             self.backupNumber += 1
             if self.backupNumber == 4:
                 self.backupNumber = 1
-            # with open(configJSONPath, 'w') as f:
-            #     f.write(json.dumps(self.config, ensure_ascii=False))
-            with codecs.open(configJSONPath, 'w', encoding='utf-8') as f:
-                f.write(json.dumps(self.config, ensure_ascii=False))
+            write_config_to_file(configJSONPath, self.config)
         except:
             logging.exception('config_备份.json 备份配置文件写入失败')
 
@@ -944,8 +940,7 @@ class MainWindow(QMainWindow):
         self.savePath = QFileDialog.getSaveFileName(self, "选择保存路径", 'DD监控室预设', "*.json")[0]
         if self.savePath:  # 保存路径有效
             try:
-                with codecs.open(self.savePath, 'w', encoding='utf-8') as f:
-                    f.write(json.dumps(self.config, ensure_ascii=False))
+                write_config_to_file(self.savePath, self.config)
                 QMessageBox.information(self, '导出预设', '导出完成', QMessageBox.Ok)
             except:
                 logging.exception('json 配置导出失败')

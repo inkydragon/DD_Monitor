@@ -8,6 +8,14 @@ import json
 import locale
 
 
+def write_config_to_file(cfg_path, config):
+    """将配置写入json文件
+    排序并美化输出
+    """
+    with codecs.open(cfg_path, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, sort_keys=True, indent=2)
+
+
 def read_local_config_file(cfg_path):
     """尝试读取用户指定的配置文件
     默认使用 UTF-8 编码，然后尝试系统偏好的编码
