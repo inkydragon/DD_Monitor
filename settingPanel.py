@@ -17,6 +17,7 @@ class SettingDialog(QDialog):
     def __init__(self):
         super(SettingDialog, self).__init__()
         self.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
+        self.setWindowTitle('偏好设置')
         self.leftList = QListWidget()
         self.rightStack = QStackedWidget()
         self.initUI()
