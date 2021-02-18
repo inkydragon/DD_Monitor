@@ -24,6 +24,7 @@ import dns.resolver
 from ReportException import thraedingExceptionHandler, uncaughtExceptionHandler,\
     unraisableExceptionHandler, loggingSystemInfo
 from danmu import TextOpation, ToolButton
+from settingPanel import SettingDialog
 
 
 # 程序所在路径
@@ -421,6 +422,8 @@ class MainWindow(QMainWindow):
         self.optionMenu.addAction(cacheSizeSetting)
         startWithDanmuSetting = QAction('自动加载弹幕设置', self, triggered=self.openStartWithDanmuSetting)
         self.optionMenu.addAction(startWithDanmuSetting)
+        mainSetting = QAction('偏好设置', self, triggered=self.mainSetting)
+        self.optionMenu.addAction(mainSetting)
         self.optionMenu.addSeparator()
         exportConfig = QAction('导出预设', self, triggered=self.exportConfig)
         self.optionMenu.addAction(exportConfig)
@@ -804,6 +807,13 @@ class MainWindow(QMainWindow):
             trueDanmu = (selection == items[0])
             self.config['startWithDanmu'] = trueDanmu
             self.dumpConfig.start()
+
+    def mainSetting(self):
+        dia = SettingDialog()
+        high_dpi = self.config.get('AA_EnableHighDpiScaling', True)
+        dia.checkbox_enable_high_dpi.setChecked(high_dpi)
+        dia.checkbox_enable_high_dpi.stateChanged.connect(lambda chk: self.config.update(AA_EnableHighDpiScaling=chk == Qt.Checked))
+        dia.exec()
 
     def openHotKey(self):
         self.hotKey.hide()
