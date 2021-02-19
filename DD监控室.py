@@ -752,12 +752,14 @@ class MainWindow(QMainWindow):
             self.controlDock.show()
             self.cardDock.show()
             self.optionMenu.menuAction().setVisible(True)
+            self.hotKeyMenu.menuAction().setVisible(True)
             self.versionMenu.menuAction().setVisible(True)
             self.payMenu.menuAction().setVisible(True)
         else:
             self.controlDock.hide()
             self.cardDock.hide()
             self.optionMenu.menuAction().setVisible(False)
+            self.hotKeyMenu.menuAction().setVisible(False)
             self.versionMenu.menuAction().setVisible(False)
             self.payMenu.menuAction().setVisible(False)
         self.controlBarLayoutToken = self.controlDock.isHidden()
@@ -918,6 +920,7 @@ class MainWindow(QMainWindow):
             else:
                 self.showNormal()
             self.optionMenu.menuAction().setVisible(True)
+            self.hotKeyMenu.menuAction().setVisible(True)
             self.versionMenu.menuAction().setVisible(True)
             self.payMenu.menuAction().setVisible(True)
             if self.controlBarLayoutToken:
@@ -928,6 +931,7 @@ class MainWindow(QMainWindow):
                 videoWidget.fullScreen = True
             self.maximumToken = self.isMaximized()
             self.optionMenu.menuAction().setVisible(False)
+            self.hotKeyMenu.menuAction().setVisible(False)
             self.versionMenu.menuAction().setVisible(False)
             self.payMenu.menuAction().setVisible(False)
             if self.controlBarLayoutToken:
