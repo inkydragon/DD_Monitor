@@ -232,6 +232,7 @@ class MainWindow(QMainWindow):
     def __init__(self, cacheFolder, progressBar, progressText):
         super(MainWindow, self).__init__()
         self.setWindowTitle('DD监控室')
+        self.setWindowIcon(QIcon(os.path.join(application_path, 'favicon.ico')))
         self.resize(1600, 900)
         self.maximumToken = True
         self.soloToken = False  # 记录静音除鼠标悬停窗口以外的其他所有窗口的标志位 True就是恢复所有房间声音
