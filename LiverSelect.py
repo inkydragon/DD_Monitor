@@ -1029,7 +1029,9 @@ class LiverPanel(QWidget):
         self.dumpConfig.emit()
 
     def changeTop(self, info):
-        self.roomIDDict[int(info[0])] = info[1]  # 房号 置顶token
+        # 房号   置顶状态
+        room_id, on_top_state = info
+        self.roomIDDict[room_id] = on_top_state
         self.refreshPanel()
         self.dumpConfig.emit()  # 发送保存config信号
 
